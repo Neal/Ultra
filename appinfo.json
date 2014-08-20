@@ -1,0 +1,23 @@
+{
+	"uuid": "cbd15827-f691-4d96-830a-8110d1d9161a",
+	"shortName": "Uber",
+	"longName": "Uber",
+	"companyName": "Neal",
+	"versionCode": 1,
+	"versionLabel": "1.0.0",
+	"capabilities": [ "configurable", "location" ],
+	"watchapp": {
+		"watchface": false
+	},
+	"appKeys": {
+		"type": 0,
+		"method": 1,
+		"index": 2,
+		"name": 3,
+		"estimate": 4
+	},
+	"resources": {
+		"media": [
+		]
+	}
+}

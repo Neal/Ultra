@@ -1,0 +1,21 @@
+#pragma once
+
+enum {
+	KEY_TYPE,
+	KEY_METHOD,
+	KEY_INDEX,
+	KEY_NAME,
+	KEY_ESTIMATE,
+};
+
+enum {
+	KEY_TYPE_ERROR,
+	KEY_TYPE_PRODUCT,
+};
+
+enum {
+	KEY_METHOD_SIZE,
+	KEY_METHOD_DATA,
+	KEY_METHOD_REFRESH,
+	KEY_METHOD_READY,
+};
