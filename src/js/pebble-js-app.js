@@ -11,10 +11,10 @@ var METHOD = {
 };
 
 var Uber = {
-	tokens: {},
+	accessToken: localStorage.getItem('accessToken') || '',
+	refreshToken: localStorage.getItem('refreshToken') || '',
 
 	init: function() {
-		try { Uber.tokens = JSON.parse(localStorage.getItem('tokens')) || {}; } catch(e) {}
 		Uber.refresh();
 	},
 
@@ -28,18 +28,17 @@ var Uber = {
 			Uber.api.estimates(pos.coords.latitude, pos.coords.longitude, function(xhr) {
 				var res = JSON.parse(xhr.responseText);
 				console.log(JSON.stringify(res));
-				// TODO: check for expired access token
+				if (xhr.status === 401) {
+					return Uber.refreshAccessToken(Uber.refresh);
+				}
 				if (!res.times) return;
 				if (!res.times.length) {
-					var msg = 'Uber is not yet available at this location.';
-					Uber.error(msg);
+					Uber.error('Uber is not yet available at this location.');
 					Uber.api.products(pos.coords.latitude, pos.coords.longitude, function(xhr) {
 						var res = JSON.parse(xhr.responseText);
 						console.log(JSON.stringify(res));
 						if (res.products && res.products.length > 0) {
-							console.log('uwot');
-							msg = 'All nearby cars are full but one should free up soon. Please try again in a few minutes.';
-							Uber.error(msg);
+							Uber.error('All nearby cars are full but one should free up soon. Please try again in a few minutes.');
 						}
 					});
 					return;
@@ -64,7 +63,7 @@ var Uber = {
 		},
 
 		makeRequest: function(method, endpoint, data, cb, fb) {
-			if (!Uber.tokens.access_token) return Uber.error('Please log in to your Uber account on the Pebble mobile app.');
+			if (!Uber.accessToken) return Uber.error('Please log in to your Uber account on the Pebble mobile app.');
 			var url = 'https://api.uber.com' + endpoint;
 			if (method == 'GET' && data) {
 				url += '?' + data;
@@ -72,7 +71,7 @@ var Uber = {
 			}
 			console.log(method + ' ' + url + ' ' + data);
 			var xhr = new XMLHttpRequest();
-			xhr.setRequestHeader('Authorization', 'Bearer ' + Uber.tokens.access_token);
+			xhr.setRequestHeader('Authorization', 'Bearer ' + Uber.accessToken);
 			xhr.open(method, url, true);
 			xhr.onload = function() { cb(xhr); };
 			xhr.onerror = function() { fb('Connection error!'); };
@@ -92,14 +91,22 @@ var Uber = {
 		}
 	},
 
-	refreshTokens: function() {
+	refreshAccessToken: function(cb) {
 		var xhr = new XMLHttpRequest();
-		xhr.open('GET', 'https://ineal.me/pebble/uber/api/refresh?token=' + Uber.tokens.refresh_token, true);
+		xhr.open('GET', 'https://ineal.me/pebble/uber/api/refresh?token=' + Uber.refreshToken, true);
 		xhr.onload = function() {
 			var res = JSON.parse(xhr.responseText);
+			console.log('new tokens: ' + JSON.stringify(res));
 			if (res.access_token) {
-				Uber.tokens = res;
-				localStorage.setItem('tokens', JSON.stringify(Uber.tokens));
+				Uber.accessToken = res.access_token;
+				localStorage.setItem('accessToken', Uber.accessToken);
+			}
+			if (res.refresh_token) {
+				Uber.refreshToken = res.refresh_token;
+				localStorage.setItem('refreshToken', Uber.refreshToken);
+			}
+			if (cb && typeof(cb) === 'function') {
+				cb();
 			}
 		};
 		xhr.send(null);
@@ -113,9 +120,16 @@ var Uber = {
 		console.log('configuration received: ' + JSON.stringify(e));
 		if (!e.response) return;
 		var data = JSON.parse(decodeURIComponent(e.response));
-		if (data.keys && data.keys.access_token) {
-			Uber.tokens = data.keys;
-			localStorage.setItem('tokens', JSON.stringify(Uber.tokens));
+		if (data.keys) {
+			if (data.keys.access_token) {
+				Uber.accessToken = data.keys.access_token;
+				localStorage.setItem('accessToken', Uber.accessToken);
+			}
+			if (data.keys.refresh_token) {
+				Uber.refreshToken = data.keys.refresh_token;
+				localStorage.setItem('refreshToken', Uber.refreshToken);
+			}
+			Uber.refresh();
 		}
 	}
 };
