@@ -1,3 +1,9 @@
-An Uber client for the Pebble Smartwatch that shows estimated times for the available Ubers around you.
+# Ultra
 
-###### App name pending. Ideas are welcome.
+An Uber client for the Pebble Smartwatch that shows estimated pick up times for the available Ubers around you.
+
+![](https://assets.getpebble.com/api/file/aZbIJGe4T52ocoLD2teH/convert)
+
+## License
+
+Available under the MIT license. See the LICENSE file for more info.
