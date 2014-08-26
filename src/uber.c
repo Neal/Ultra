@@ -34,7 +34,7 @@ void uber_in_received_handler(DictionaryIterator *iter) {
 		case KEY_TYPE_ERROR: {
 			error = malloc(dict_find(iter, KEY_NAME)->length);
 			if (error)
-				strncpy(error, dict_find(iter, KEY_NAME)->value->cstring, dict_find(iter, KEY_NAME)->length - 1);
+				strncpy(error, dict_find(iter, KEY_NAME)->value->cstring, dict_find(iter, KEY_NAME)->length);
 			reload_data_and_mark_dirty();
 			break;
 		}
@@ -53,7 +53,8 @@ void uber_in_received_handler(DictionaryIterator *iter) {
 					product->index = index;
 					strncpy(product->name, dict_find(iter, KEY_NAME)->value->cstring, sizeof(product->name) - 1);
 					strncpy(product->estimate, dict_find(iter, KEY_ESTIMATE)->value->cstring, sizeof(product->estimate) - 1);
-					LOG("product: %d '%s' '%s'", product->index, product->name, product->estimate);
+					strncpy(product->surge, dict_find(iter, KEY_SURGE)->value->cstring, sizeof(product->surge) - 1);
+					LOG("product: %d '%s' '%s' '%s'", product->index, product->name, product->estimate, product->surge);
 					reload_data_and_mark_dirty();
 					break;
 				}

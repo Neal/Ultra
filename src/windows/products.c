@@ -63,6 +63,9 @@ static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuI
 	if (error) {
 		return graphics_text_layout_get_content_size(error, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
 	}
+	if (cell_index->row < num_products && strlen(products[cell_index->row].surge) != 0) {
+		return 48;
+	}
 	return 30;
 }
 
@@ -79,6 +82,9 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 	} else {
 		graphics_draw_text(ctx, products[cell_index->row].name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 		graphics_draw_text(ctx, products[cell_index->row].estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+		if (strlen(products[cell_index->row].surge) != 0) {
+			graphics_draw_text(ctx, products[cell_index->row].surge, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(4, 22, 136, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		}
 	}
 }
 

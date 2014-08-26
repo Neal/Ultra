@@ -23,9 +23,24 @@ var Uber = {
 		appMessageQueue.send({type:TYPE.ERROR, name:error});
 	},
 
+	sendProducts: function(products) {
+		appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.SIZE, index:products.length});
+		for (var i = 0; i < products.length; i++) {
+			var name = products[i].display_name.substring(0,12);
+			var estimate = Math.ceil(products[i].estimate / 60) + ' min';
+			var surge_multiplier = products[i].surge_multiplier || 1;
+			var surge = (surge_multiplier > 1) ? 'Surge pricing: ' + surge_multiplier + 'x' : '';
+			appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.DATA, index:i, name:name, estimate:estimate, surge:surge});
+		}
+	},
+
 	refresh: function() {
+		Uber.error('Trying to get Geolocation...');
 		navigator.geolocation.getCurrentPosition(function(pos) {
-			Uber.api.estimates(pos.coords.latitude, pos.coords.longitude, function(xhr) {
+			var latitude = pos.coords.latitude || 0;
+			var longitude = pos.coords.longitude || 0;
+			Uber.error('Requesting estimated pick up times...');
+			Uber.api.timeEstimates(latitude, longitude, function(xhr) {
 				var res = JSON.parse(xhr.responseText);
 				console.log(JSON.stringify(res));
 				if (xhr.status === 401) {
@@ -43,12 +58,24 @@ var Uber = {
 					});
 					return;
 				}
-				appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.SIZE, index:res.times.length});
-				for (var i = 0; i < res.times.length; i++) {
-					var name = res.times[i].display_name.substring(0,12);
-					var estimate = Math.ceil(res.times[i].estimate / 60) + ' min';
-					appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.DATA, index:i, name:name, estimate:estimate});
-				}
+				Uber.error('Checking for surge pricing...');
+				Uber.api.priceEstimates(latitude, longitude, function(xhr2) {
+					console.log('1');
+					var res2 = JSON.parse(xhr2.responseText);
+					console.log(JSON.stringify(res2));
+					if (res2.prices && res2.prices.length > 0) {
+						res2.prices.forEach(function(price) {
+							for (var i = 0; i < res.times.length; i++) {
+								if (res.times[i].product_id == price.product_id) {
+									res.times[i].surge_multiplier = price.surge_multiplier;
+								}
+							}
+						});
+					}
+					Uber.sendProducts(res.times);
+				}, function(err) {
+					Uber.sendProducts(res.times);
+				});
 			}, Uber.error);
 		}, function(err) { Uber.error('Failed to get geolocation!'); }, { timeout: 10000 });
 	},
@@ -58,8 +85,12 @@ var Uber = {
 			Uber.api.makeRequest('GET', '/v1/products', serialize({latitude:latitude, longitude:longitude}), cb, fb);
 		},
 
-		estimates: function(latitude, longitude, cb, fb) {
+		timeEstimates: function(latitude, longitude, cb, fb) {
 			Uber.api.makeRequest('GET', '/v1/estimates/time', serialize({start_latitude:latitude, start_longitude:longitude}), cb, fb);
+		},
+
+		priceEstimates: function(latitude, longitude, cb, fb) {
+			Uber.api.makeRequest('GET', '/v1/estimates/price', serialize({start_latitude:latitude, start_longitude:longitude, end_latitude:latitude, end_longitude:longitude}), cb, fb);
 		},
 
 		makeRequest: function(method, endpoint, data, cb, fb) {
