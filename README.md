@@ -1,8 +1,8 @@
 # Ultra
 
-An Uber client for the Pebble Smartwatch that shows estimated pick up times for the available Ubers around you.
+An Uber client for the Pebble Smartwatch that shows estimated pick up times with surge pricing info for the available Ubers around you.
 
-![](https://assets.getpebble.com/api/file/aZbIJGe4T52ocoLD2teH/convert)
+![](https://assets.getpebble.com/api/file/dRk1jH4WRAexo60oPL2F/convert)
 
 ## License
 
