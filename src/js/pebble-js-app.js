@@ -34,12 +34,43 @@ var Uber = {
 		}
 	},
 
+	checkProducts: function(latitude, longitude) {
+		Uber.error('Uber is not yet available at this location.');
+		Uber.api.products(latitude, longitude, function(xhr) {
+			var res = JSON.parse(xhr.responseText);
+			console.log(JSON.stringify(res));
+			if (res.products && res.products.length > 0) {
+				Uber.error('All nearby cars are full but one should free up soon. Please try again in a few minutes.');
+			}
+		});
+	},
+
 	refresh: function() {
 		Uber.error('Trying to get Geolocation...');
 		navigator.geolocation.getCurrentPosition(function(pos) {
 			var latitude = pos.coords.latitude || 0;
 			var longitude = pos.coords.longitude || 0;
 			Uber.error('Requesting estimated pick up times...');
+			if (!Uber.accessToken) {
+				var url = 'https://ineal.me/pebble/uber/api/estimates?latitude=' + latitude + '&longitude=' + longitude;
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', url, true);
+				xhr.onload = function() {
+					console.log(xhr.responseText);
+					var res = JSON.parse(xhr.responseText);
+					console.log(JSON.stringify(res));
+					if (!res.times) return;
+					if (!res.times.length) {
+						return Uber.error('Uber is not yet available at this location or all cars are full at the moment. Please try again in a few minutes.');
+					}
+					Uber.sendProducts(res.times);
+				};
+				xhr.onerror = function() { Uber.error('Connection error!'); };
+				xhr.ontimeout = function() { Uber.error('Connection to Uber API timed out!'); };
+				xhr.timeout = 30000;
+				xhr.send(null);
+				return;
+			}
 			Uber.api.timeEstimates(latitude, longitude, function(xhr) {
 				var res = JSON.parse(xhr.responseText);
 				console.log(JSON.stringify(res));
@@ -48,15 +79,7 @@ var Uber = {
 				}
 				if (!res.times) return;
 				if (!res.times.length) {
-					Uber.error('Uber is not yet available at this location.');
-					Uber.api.products(pos.coords.latitude, pos.coords.longitude, function(xhr) {
-						var res = JSON.parse(xhr.responseText);
-						console.log(JSON.stringify(res));
-						if (res.products && res.products.length > 0) {
-							Uber.error('All nearby cars are full but one should free up soon. Please try again in a few minutes.');
-						}
-					});
-					return;
+					return Uber.checkProducts(latitude, longitude);
 				}
 				Uber.error('Checking for surge pricing...');
 				Uber.api.priceEstimates(latitude, longitude, function(xhr2) {
