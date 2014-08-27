@@ -30,7 +30,15 @@ var Uber = {
 			var estimate = Math.ceil(products[i].estimate / 60) + ' min';
 			var surge_multiplier = products[i].surge_multiplier || 1;
 			var surge = (surge_multiplier > 1) ? 'Surge pricing: ' + surge_multiplier + 'x' : '';
-			appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.DATA, index:i, name:name, estimate:estimate, surge:surge});
+			var resource = 0;
+			switch (name.toLowerCase()) {
+				case 'uberx': resource = 0; break;
+				case 'uberxl': resource = 1; break;
+				case 'uberblack': resource = 2; break;
+				case 'ubersuv': resource = 3; break;
+				case 'ubertaxi': resource = 4; break;
+			}
+			appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.DATA, index:i, name:name, estimate:estimate, surge:surge, resource:resource});
 		}
 	},
 

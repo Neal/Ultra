@@ -1,10 +1,14 @@
 #pragma once
 
+#include <pebble.h>
+
 typedef struct {
 	uint8_t index;
 	char name[12];
 	char estimate[8];
 	char surge[24];
+	GBitmap *image;
+	GRect image_rect;
 } Product;
 
 extern Product* products;

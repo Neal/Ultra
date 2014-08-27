@@ -15,6 +15,23 @@ static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *c
 
 static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
+static GBitmap *surge;
+
+typedef struct {
+	uint32_t id;
+	uint16_t x;
+	uint16_t y;
+	uint16_t w;
+	uint16_t h;
+} ResourceImages;
+
+ResourceImages resource_images[] = {
+	{ RESOURCE_ID_IMAGE_UBERX, 1, 12, 20, 7 },
+	{ RESOURCE_ID_IMAGE_UBERXL, 1, 12, 20, 7 },
+	{ RESOURCE_ID_IMAGE_UBERBLACK, 1, 12, 20, 6 },
+	{ RESOURCE_ID_IMAGE_UBERSUV, 1, 11, 20, 8 },
+	{ RESOURCE_ID_IMAGE_UBERTAXI, 3, 7, 16, 15 },
+};
 
 void products_init(void) {
 	window = window_create();
@@ -33,16 +50,27 @@ void products_init(void) {
 	menu_layer_set_click_config_onto_window(menu_layer, window);
 	menu_layer_add_to_window(menu_layer, window);
 
+	surge = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SURGE);
+
 	window_stack_push(window, true);
 }
 
 void products_deinit(void) {
+	gbitmap_destroy_safe(surge);
 	menu_layer_destroy_safe(menu_layer);
 	window_destroy_safe(window);
 }
 
 void products_reload_data_and_mark_dirty(void) {
 	menu_layer_reload_data_and_mark_dirty(menu_layer);
+}
+
+uint32_t products_get_resource_id(int i) {
+	return resource_images[i].id;
+}
+
+GRect products_get_resource_image_rect(int i) {
+	return GRect(resource_images[i].x, resource_images[i].y, resource_images[i].w, resource_images[i].h);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
@@ -56,7 +84,7 @@ static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_
 }
 
 static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-	return MENU_CELL_BASIC_HEADER_HEIGHT;
+	return 0;
 }
 
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
@@ -70,7 +98,6 @@ static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuI
 }
 
 static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
-	menu_cell_basic_header_draw(ctx, cell_layer, "Uber");
 }
 
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
@@ -80,10 +107,12 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 	} else if (num_products == 0) {
 		graphics_draw_text(ctx, "Loading...", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	} else {
-		graphics_draw_text(ctx, products[cell_index->row].name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-		graphics_draw_text(ctx, products[cell_index->row].estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+		graphics_draw_bitmap_in_rect(ctx, products[cell_index->row].image, products[cell_index->row].image_rect);
+		graphics_draw_text(ctx, products[cell_index->row].name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(24, 2, 116, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, products[cell_index->row].estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 2, 42, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
 		if (strlen(products[cell_index->row].surge) != 0) {
-			graphics_draw_text(ctx, products[cell_index->row].surge, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(4, 22, 136, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+			graphics_draw_text(ctx, products[cell_index->row].surge, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(24, 22, 116, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+			graphics_draw_bitmap_in_rect(ctx, surge, GRect(4, 26, 16, 16));
 		}
 	}
 }

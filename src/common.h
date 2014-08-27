@@ -7,6 +7,7 @@ enum {
 	KEY_NAME,
 	KEY_ESTIMATE,
 	KEY_SURGE,
+	KEY_RESOURCE,
 };
 
 enum {

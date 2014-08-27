@@ -15,7 +15,8 @@
 		"index": 2,
 		"name": 3,
 		"estimate": 4,
-		"surge": 5
+		"surge": 5,
+		"resource": 6
 	},
 	"resources": {
 		"media": [
@@ -24,6 +25,36 @@
 				"type": "png",
 				"name": "IMAGE_MENU_ICON",
 				"file": "images/menu_icon.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_SURGE",
+				"file": "images/surge.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERX",
+				"file": "images/uberx.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERXL",
+				"file": "images/uberxl.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERBLACK",
+				"file": "images/uberblack.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERSUV",
+				"file": "images/ubersuv.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERTAXI",
+				"file": "images/ubertaxi.png"
 			}
 		]
 	}
