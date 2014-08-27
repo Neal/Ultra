@@ -52,7 +52,7 @@ var Uber = {
 			var longitude = pos.coords.longitude || 0;
 			Uber.error('Requesting estimated pick up times...');
 			if (!Uber.accessToken) {
-				var url = 'https://ineal.me/pebble/uber/api/estimates?latitude=' + latitude + '&longitude=' + longitude;
+				var url = 'https://ineal.me/pebble/ultra/api/estimates?latitude=' + latitude + '&longitude=' + longitude;
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', url, true);
 				xhr.onload = function() {
@@ -147,7 +147,7 @@ var Uber = {
 
 	refreshAccessToken: function(cb) {
 		var xhr = new XMLHttpRequest();
-		xhr.open('GET', 'https://ineal.me/pebble/uber/api/refresh?token=' + Uber.refreshToken, true);
+		xhr.open('GET', 'https://ineal.me/pebble/ultra/api/refresh?token=' + Uber.refreshToken, true);
 		xhr.onload = function() {
 			var res = JSON.parse(xhr.responseText);
 			console.log('new tokens: ' + JSON.stringify(res));
@@ -167,7 +167,7 @@ var Uber = {
 	},
 
 	showConfiguration: function() {
-		Pebble.openURL('https://ineal.me/pebble/uber/api/login');
+		Pebble.openURL('https://ineal.me/pebble/ultra/api/login');
 	},
 
 	handleConfiguration: function(e) {
