@@ -1,13 +1,29 @@
 #include <pebble.h>
 #include "uber.h"
 #include "libs/pebble-assist.h"
-#include "common.h"
+#include "generated/appinfo.h"
+#include "generated/keys.h"
 #include "appmessage.h"
 #include "windows/products.h"
 
 static void free_products();
 static void timer_callback(void *data);
 static AppTimer *timer = NULL;
+
+typedef struct {
+	uint32_t id;
+	GRect bounds;
+} ResourceImages;
+
+ResourceImages resource_images[] = {
+	{ RESOURCE_ID_IMAGE_UBERBLACK, { { 1, 12 }, { 20, 6 } } },
+	{ RESOURCE_ID_IMAGE_UBERX,     { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERXL,    { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERTAXI,  { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERLUX,   { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERSUV,   { { 1, 11 }, { 20, 8 } } },
+	{ RESOURCE_ID_IMAGE_UBERT,     { { 3,  7 }, { 16, 15 } } },
+};
 
 Product* products = NULL;
 char* error = NULL;
@@ -29,34 +45,35 @@ void uber_deinit(void) {
 }
 
 void uber_in_received_handler(DictionaryIterator *iter) {
-	if (!dict_find(iter, KEY_TYPE)) return;
+	if (!dict_find(iter, APP_KEY_TYPE)) return;
 	free_safe(error);
-	switch (dict_find(iter, KEY_TYPE)->value->uint8) {
+	switch (dict_find(iter, APP_KEY_TYPE)->value->uint8) {
 		case KEY_TYPE_ERROR: {
-			error = malloc(dict_find(iter, KEY_NAME)->length);
+			error = malloc(dict_find(iter, APP_KEY_NAME)->length);
 			if (error)
-				strncpy(error, dict_find(iter, KEY_NAME)->value->cstring, dict_find(iter, KEY_NAME)->length);
+				strncpy(error, dict_find(iter, APP_KEY_NAME)->value->cstring, dict_find(iter, APP_KEY_NAME)->length);
 			reload_data_and_mark_dirty();
 			break;
 		}
 		case KEY_TYPE_PRODUCT:
-			switch (dict_find(iter, KEY_METHOD)->value->uint8) {
+			switch (dict_find(iter, APP_KEY_METHOD)->value->uint8) {
 				case KEY_METHOD_SIZE:
 					free_products();
-					num_products = dict_find(iter, KEY_INDEX)->value->uint8;
+					num_products = dict_find(iter, APP_KEY_INDEX)->value->uint8;
 					products = malloc(sizeof(Product) * num_products);
 					if (products == NULL) num_products = 0;
 					break;
 				case KEY_METHOD_DATA: {
 					if (num_products == 0) break;
-					uint8_t index = dict_find(iter, KEY_INDEX)->value->uint8;
+					uint8_t index = dict_find(iter, APP_KEY_INDEX)->value->uint8;
+					uint32_t resource = dict_find(iter, APP_KEY_RESOURCE)->value->uint32;
 					Product *product = &products[index];
 					product->index = index;
-					product->image = gbitmap_create_with_resource(products_get_resource_id(dict_find(iter, KEY_RESOURCE)->value->uint32));
-					product->image_rect = products_get_resource_image_rect(dict_find(iter, KEY_RESOURCE)->value->uint32);
-					strncpy(product->name, dict_find(iter, KEY_NAME)->value->cstring, sizeof(product->name) - 1);
-					strncpy(product->estimate, dict_find(iter, KEY_ESTIMATE)->value->cstring, sizeof(product->estimate) - 1);
-					strncpy(product->surge, dict_find(iter, KEY_SURGE)->value->cstring, sizeof(product->surge) - 1);
+					product->image = gbitmap_create_with_resource(resource_images[resource].id);
+					product->image_bounds = resource_images[resource].bounds;
+					strncpy(product->name, dict_find(iter, APP_KEY_NAME)->value->cstring, sizeof(product->name) - 1);
+					strncpy(product->estimate, dict_find(iter, APP_KEY_ESTIMATE)->value->cstring, sizeof(product->estimate) - 1);
+					strncpy(product->surge, dict_find(iter, APP_KEY_SURGE)->value->cstring, sizeof(product->surge) - 1);
 					LOG("product: %d '%s' '%s' '%s'", product->index, product->name, product->estimate, product->surge);
 					reload_data_and_mark_dirty();
 					break;
@@ -81,7 +98,7 @@ void uber_refresh() {
 	num_products = 0;
 	DictionaryIterator *iter;
 	app_message_outbox_begin(&iter);
-	dict_write_uint8(iter, KEY_METHOD, KEY_METHOD_REFRESH);
+	dict_write_uint8(iter, APP_KEY_METHOD, KEY_METHOD_REFRESH);
 	dict_write_end(iter);
 	app_message_outbox_send();
 	reload_data_and_mark_dirty();
@@ -107,7 +124,7 @@ static void free_products() {
 static void timer_callback(void *data) {
 	DictionaryIterator *iter;
 	app_message_outbox_begin(&iter);
-	dict_write_uint8(iter, KEY_METHOD, KEY_METHOD_READY);
+	dict_write_uint8(iter, APP_KEY_METHOD, KEY_METHOD_READY);
 	dict_write_end(iter);
 	app_message_outbox_send();
 }

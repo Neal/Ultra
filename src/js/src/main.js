@@ -1,15 +1,3 @@
-var TYPE = {
-	ERROR: 0,
-	PRODUCT: 1
-};
-
-var METHOD = {
-	SIZE: 0,
-	DATA: 1,
-	REFRESH: 2,
-	READY: 3
-};
-
 var Uber = {
 	accessToken: localStorage.getItem('accessToken') || '',
 	refreshToken: localStorage.getItem('refreshToken') || '',
@@ -28,18 +16,8 @@ var Uber = {
 		for (var i = 0; i < products.length; i++) {
 			var name = products[i].display_name.substring(0,12);
 			var estimate = Math.ceil(products[i].estimate / 60) + ' min';
-			var surge_multiplier = products[i].surge_multiplier || 1;
-			var surge = (surge_multiplier > 1) ? 'Surge pricing: ' + surge_multiplier + 'x' : '';
-			var resource = 0;
-			switch (name.toLowerCase()) {
-				case 'uberx': resource = 0; break;
-				case 'uberxl': resource = 1; break;
-				case 'uberblack': resource = 2; break;
-				case 'ubersuv': resource = 3; break;
-				case 'ubertaxi': resource = 4; break;
-				case 'ubert': resource = 5; break;
-				case 'uberlux': resource = 6; break;
-			}
+			var surge = (products[i].surge_multiplier > 1) ? 'Surge pricing: ' + products[i].surge_multiplier + 'x' : '';
+			var resource = RESOURCES[name.toUpperCase()] || RESOURCES.UBERX;
 			appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.DATA, index:i, name:name, estimate:estimate, surge:surge, resource:resource});
 		}
 	},
@@ -66,7 +44,6 @@ var Uber = {
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', url, true);
 				xhr.onload = function() {
-					console.log(xhr.responseText);
 					var res = JSON.parse(xhr.responseText);
 					console.log(JSON.stringify(res));
 					if (!res.times) return;
@@ -93,7 +70,6 @@ var Uber = {
 				}
 				Uber.error('Checking for surge pricing...');
 				Uber.api.priceEstimates(latitude, longitude, function(xhr2) {
-					console.log('1');
 					var res2 = JSON.parse(xhr2.responseText);
 					console.log(JSON.stringify(res2));
 					if (res2.prices && res2.prices.length > 0) {
@@ -202,54 +178,3 @@ Pebble.addEventListener('ready', Uber.init);
 Pebble.addEventListener('appmessage', Uber.handleAppMessage);
 Pebble.addEventListener('showConfiguration', Uber.showConfiguration);
 Pebble.addEventListener('webviewclosed', Uber.handleConfiguration);
-
-var appMessageQueue = {
-	queue: [],
-	numTries: 0,
-	maxTries: 5,
-	working: false,
-	clear: function() {
-		this.queue = [];
-		this.working = false;
-	},
-	isEmpty: function() {
-		return this.queue.length === 0;
-	},
-	nextMessage: function() {
-		return this.isEmpty() ? {} : this.queue[0];
-	},
-	send: function(message) {
-		if (message) this.queue.push(message);
-		if (this.working) return;
-		if (this.queue.length > 0) {
-			this.working = true;
-			var ack = function() {
-				appMessageQueue.numTries = 0;
-				appMessageQueue.queue.shift();
-				appMessageQueue.working = false;
-				appMessageQueue.send();
-			};
-			var nack = function() {
-				appMessageQueue.numTries++;
-				appMessageQueue.working = false;
-				appMessageQueue.send();
-			};
-			if (this.numTries >= this.maxTries) {
-				console.log('Failed sending AppMessage: ' + JSON.stringify(this.nextMessage()));
-				ack();
-			}
-			console.log('Sending AppMessage: ' + JSON.stringify(this.nextMessage()));
-			Pebble.sendAppMessage(this.nextMessage(), ack, nack);
-		}
-	}
-};
-
-function serialize(obj) {
-	var s = [];
-	for (var p in obj) {
-		if (obj.hasOwnProperty(p)) {
-			s.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));
-		}
-	}
-	return s.join('&');
-}

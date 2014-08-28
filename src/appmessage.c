@@ -1,7 +1,6 @@
 #include <pebble.h>
 #include "appmessage.h"
 #include "libs/pebble-assist.h"
-#include "common.h"
 #include "uber.h"
 
 static void in_received_handler(DictionaryIterator *iter, void *context);

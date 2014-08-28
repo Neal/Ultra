@@ -1,0 +1,9 @@
+var RESOURCES = {
+	UBERBLACK: 0,
+	UBERX: 1,
+	UBERXL: 2,
+	UBERTAXI: 3,
+	UBERLUX: 4,
+	UBERSUV: 5,
+	UBERT: 6
+};

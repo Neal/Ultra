@@ -1,7 +1,6 @@
 #include <pebble.h>
 #include "products.h"
 #include "../libs/pebble-assist.h"
-#include "../common.h"
 #include "../uber.h"
 
 static uint16_t menu_get_num_sections_callback(struct MenuLayer *menu_layer, void *callback_context);
@@ -16,24 +15,6 @@ static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *c
 static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
 static GBitmap *surge;
-
-typedef struct {
-	uint32_t id;
-	uint16_t x;
-	uint16_t y;
-	uint16_t w;
-	uint16_t h;
-} ResourceImages;
-
-ResourceImages resource_images[] = {
-	{ RESOURCE_ID_IMAGE_UBERX, 1, 12, 20, 7 },
-	{ RESOURCE_ID_IMAGE_UBERXL, 1, 12, 20, 7 },
-	{ RESOURCE_ID_IMAGE_UBERBLACK, 1, 12, 20, 6 },
-	{ RESOURCE_ID_IMAGE_UBERSUV, 1, 11, 20, 8 },
-	{ RESOURCE_ID_IMAGE_UBERTAXI, 1, 12, 20, 7 },
-	{ RESOURCE_ID_IMAGE_UBERT, 3, 7, 16, 15 },
-	{ RESOURCE_ID_IMAGE_UBERLUX, 1, 12, 20, 7 },
-};
 
 void products_init(void) {
 	window = window_create();
@@ -65,14 +46,6 @@ void products_deinit(void) {
 
 void products_reload_data_and_mark_dirty(void) {
 	menu_layer_reload_data_and_mark_dirty(menu_layer);
-}
-
-uint32_t products_get_resource_id(int i) {
-	return resource_images[i].id;
-}
-
-GRect products_get_resource_image_rect(int i) {
-	return GRect(resource_images[i].x, resource_images[i].y, resource_images[i].w, resource_images[i].h);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
@@ -109,7 +82,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 	} else if (num_products == 0) {
 		graphics_draw_text(ctx, "Loading...", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	} else {
-		graphics_draw_bitmap_in_rect(ctx, products[cell_index->row].image, products[cell_index->row].image_rect);
+		graphics_draw_bitmap_in_rect(ctx, products[cell_index->row].image, products[cell_index->row].image_bounds);
 		graphics_draw_text(ctx, products[cell_index->row].name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(24, 2, 116, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 		graphics_draw_text(ctx, products[cell_index->row].estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 2, 42, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
 		if (strlen(products[cell_index->row].surge) != 0) {

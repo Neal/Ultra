@@ -8,7 +8,7 @@ typedef struct {
 	char estimate[8];
 	char surge[24];
 	GBitmap *image;
-	GRect image_rect;
+	GRect image_bounds;
 } Product;
 
 extern Product* products;

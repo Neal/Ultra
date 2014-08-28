@@ -1,0 +1,12 @@
+{
+	"TYPE": [
+		"ERROR",
+		"PRODUCT"
+	],
+	"METHOD": [
+		"SIZE",
+		"DATA",
+		"REFRESH",
+		"READY"
+	]
+}
