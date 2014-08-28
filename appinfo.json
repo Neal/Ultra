@@ -60,6 +60,11 @@
 				"type": "png",
 				"name": "IMAGE_UBERT",
 				"file": "images/ubert.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERLUX",
+				"file": "images/uberlux.png"
 			}
 		]
 	}
