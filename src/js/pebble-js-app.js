@@ -37,6 +37,7 @@ var Uber = {
 				case 'uberblack': resource = 2; break;
 				case 'ubersuv': resource = 3; break;
 				case 'ubertaxi': resource = 4; break;
+				case 'ubert': resource = 5; break;
 			}
 			appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.DATA, index:i, name:name, estimate:estimate, surge:surge, resource:resource});
 		}

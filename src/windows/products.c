@@ -30,7 +30,8 @@ ResourceImages resource_images[] = {
 	{ RESOURCE_ID_IMAGE_UBERXL, 1, 12, 20, 7 },
 	{ RESOURCE_ID_IMAGE_UBERBLACK, 1, 12, 20, 6 },
 	{ RESOURCE_ID_IMAGE_UBERSUV, 1, 11, 20, 8 },
-	{ RESOURCE_ID_IMAGE_UBERTAXI, 3, 7, 16, 15 },
+	{ RESOURCE_ID_IMAGE_UBERTAXI, 1, 12, 20, 7 },
+	{ RESOURCE_ID_IMAGE_UBERT, 3, 7, 16, 15 },
 };
 
 void products_init(void) {

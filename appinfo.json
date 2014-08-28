@@ -55,6 +55,11 @@
 				"type": "png",
 				"name": "IMAGE_UBERTAXI",
 				"file": "images/ubertaxi.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERT",
+				"file": "images/ubert.png"
 			}
 		]
 	}
