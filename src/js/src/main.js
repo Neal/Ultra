@@ -8,6 +8,17 @@ var Uber = {
 		Uber.refresh();
 	},
 
+	sendError: {
+		product: function(error) {
+			appMessageQueue.clear();
+			appMessageQueue.send({type:TYPE.PRODUCT, method:METHOD.ERROR, name:error});
+		},
+		location: function(error) {
+			appMessageQueue.clear();
+			appMessageQueue.send({type:TYPE.LOCATON, method:METHOD.ERROR, name:error});
+		}
+	},
+
 	error: function(error) {
 		appMessageQueue.clear();
 		appMessageQueue.send({type:TYPE.ERROR, name:error});
@@ -33,12 +44,12 @@ var Uber = {
 	},
 
 	checkProducts: function(latitude, longitude) {
-		Uber.error('Uber is not yet available at this location.');
+		Uber.sendError.product('Uber is not yet available at this location.');
 		Uber.api.products(latitude, longitude, function(xhr) {
 			var res = JSON.parse(xhr.responseText);
 			console.log(JSON.stringify(res));
 			if (res.products && res.products.length > 0) {
-				Uber.error('All nearby cars are full but one should free up soon. Please try again in a few minutes.');
+				Uber.sendError.product('All nearby cars are full but one should free up soon. Please try again in a few minutes.');
 			}
 		});
 	},
@@ -77,10 +88,10 @@ var Uber = {
 					var res = JSON.parse(xhr.responseText);
 					console.log(JSON.stringify(res));
 					if (xhr.status === 401) {
-						return Uber.refreshAccessToken(Uber.refresh);
+						return Uber.refreshAccessToken(Uber.getPriceEstimates);
 					}
 					if (res.code && res.code == 'distance_exceeded') {
-						// do something special?
+						return appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:location.name.substring(0,12), estimate:'N/A'});
 					}
 					if (!res.prices || !res.prices.length) return;
 					var name = location.name.substring(0,12);
@@ -93,15 +104,15 @@ var Uber = {
 					appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:name, estimate:estimate});
 				});
 			});
-		}, function(err) { Uber.error('Failed to get geolocation!'); }, { timeout: 10000 });
+		}, function(err) { Uber.sendError.location('Failed to get geolocation!'); }, { timeout: 10000 });
 	},
 
 	refresh: function() {
-		Uber.error('Trying to get Geolocation...');
+		Uber.sendError.product('Trying to get Geolocation...');
 		navigator.geolocation.getCurrentPosition(function(pos) {
 			var latitude = pos.coords.latitude || 0;
 			var longitude = pos.coords.longitude || 0;
-			Uber.error('Requesting estimated pick up times...');
+			Uber.sendError.product('Requesting estimated pick up times...');
 			if (!Uber.accessToken) {
 				var url = 'https://ineal.me/pebble/ultra/api/estimates/time?latitude=' + latitude + '&longitude=' + longitude;
 				var xhr = new XMLHttpRequest();
@@ -110,13 +121,13 @@ var Uber = {
 					var res = JSON.parse(xhr.responseText);
 					console.log(JSON.stringify(res));
 					if (!res.times || !res.times.length) {
-						return Uber.error('Uber is not yet available at this location or all cars are full at the moment. Please try again in a few minutes.');
+						return Uber.sendError.product('Uber is not yet available at this location or all cars are full at the moment. Please try again in a few minutes.');
 					}
 					Uber.products = res.times;
 					Uber.sendProducts();
 				};
-				xhr.onerror = function() { Uber.error('Connection error!'); };
-				xhr.ontimeout = function() { Uber.error('Connection to Uber API timed out!'); };
+				xhr.onerror = function() { Uber.sendError.product('Connection error!'); };
+				xhr.ontimeout = function() { Uber.sendError.product('Connection to Uber API timed out!'); };
 				xhr.timeout = 30000;
 				xhr.send(null);
 				return;
@@ -132,7 +143,7 @@ var Uber = {
 					return Uber.checkProducts(latitude, longitude);
 				}
 				Uber.products = res.times;
-				Uber.error('Checking for surge pricing...');
+				Uber.sendError.product('Checking for surge pricing...');
 				Uber.api.priceEstimates(latitude, longitude, latitude, longitude, function(xhr2) {
 					var res2 = JSON.parse(xhr2.responseText);
 					console.log(JSON.stringify(res2));
@@ -149,8 +160,8 @@ var Uber = {
 				}, function(err) {
 					Uber.sendProducts();
 				});
-			}, Uber.error);
-		}, function(err) { Uber.error('Failed to get geolocation!'); }, { timeout: 10000 });
+			}, Uber.sendError.product);
+		}, function(err) { Uber.sendError.product('Failed to get geolocation!'); }, { timeout: 10000 });
 	},
 
 	api: {
@@ -167,7 +178,7 @@ var Uber = {
 		},
 
 		makeRequest: function(method, endpoint, data, cb, fb) {
-			if (!Uber.accessToken) return Uber.error('Please log in to your Uber account on the Pebble mobile app.');
+			if (!Uber.accessToken) return Uber.sendError.product('Please log in to your Uber account on the Pebble mobile app.');
 			var url = 'https://api.uber.com' + endpoint;
 			if (method == 'GET' && data) {
 				url += '?' + data;
@@ -189,7 +200,7 @@ var Uber = {
 		console.log('AppMessage received: ' + JSON.stringify(e.payload));
 		if (!e.payload.method) return;
 		switch (e.payload.method) {
-			case METHOD.REFRESH:
+			case METHOD.REQUESTPRODUCTS:
 				Uber.refresh();
 				break;
 			case METHOD.REQUESTLOCATIONS:

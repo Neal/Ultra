@@ -24,7 +24,6 @@ static void in_dropped_handler(AppMessageResult reason, void *context) {
 }
 
 static void out_sent_handler(DictionaryIterator *sent, void *context) {
-	uber_out_sent_handler(sent);
 }
 
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {

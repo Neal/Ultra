@@ -1,14 +1,12 @@
 #include <pebble.h>
 #include "products.h"
-#include "../libs/pebble-assist.h"
-#include "../uber.h"
+#include "libs/pebble-assist.h"
+#include "uber.h"
+#include "product.h"
 #include "locations.h"
 
-static uint16_t menu_get_num_sections_callback(struct MenuLayer *menu_layer, void *callback_context);
 static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context);
-static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context);
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
-static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context);
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context);
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
 static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
@@ -22,11 +20,8 @@ void products_init(void) {
 
 	menu_layer = menu_layer_create_fullscreen(window);
 	menu_layer_set_callbacks(menu_layer, NULL, (MenuLayerCallbacks) {
-		.get_num_sections = menu_get_num_sections_callback,
 		.get_num_rows = menu_get_num_rows_callback,
-		.get_header_height = menu_get_header_height_callback,
 		.get_cell_height = menu_get_cell_height_callback,
-		.draw_header = menu_draw_header_callback,
 		.draw_row = menu_draw_row_callback,
 		.select_click = menu_select_callback,
 		.select_long_click = menu_select_long_callback,
@@ -37,54 +32,43 @@ void products_init(void) {
 	surge = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SURGE);
 
 	window_stack_push(window, true);
-
-	locations_init();
 }
 
 void products_deinit(void) {
-	locations_deinit();
 	gbitmap_destroy_safe(surge);
 	menu_layer_destroy_safe(menu_layer);
 	window_destroy_safe(window);
 }
 
 void products_reload_data_and_mark_dirty(void) {
-	locations_reload_data_and_mark_dirty();
 	menu_layer_reload_data_and_mark_dirty(menu_layer);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-static uint16_t menu_get_num_sections_callback(struct MenuLayer *menu_layer, void *callback_context) {
-	return 1;
-}
-
 static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-	return num_products ? num_products : 1;
-}
-
-static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-	return 0;
+	return product_count() ? product_count() : 1;
 }
 
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-	if (error) {
-		return graphics_text_layout_get_content_size(error, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
+	if (uber_get_error()) {
+		return graphics_text_layout_get_content_size(uber_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
+	} else if (product_get_error()) {
+		return graphics_text_layout_get_content_size(product_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
 	}
-	if (cell_index->row < num_products && strlen(products[cell_index->row].surge) != 0) {
+	if (cell_index->row < product_count() && strlen(product_get(cell_index->row)->surge) != 0) {
 		return 48;
 	}
 	return 30;
 }
 
-static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
-}
-
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
 	graphics_context_set_text_color(ctx, GColorBlack);
-	if (error) {
-		graphics_draw_text(ctx, error, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-	} else if (num_products == 0) {
+	if (uber_get_error()) {
+		graphics_draw_text(ctx, uber_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+	} else if (product_get_error()) {
+		graphics_draw_text(ctx, product_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+	} else if (!product_count()) {
 		graphics_draw_text(ctx, "Loading...", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	} else {
 		Product *product = product_get(cell_index->row);
@@ -99,11 +83,11 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 }
 
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-	if (num_products == 0) return;
-	selected_product = cell_index->row;
+	if (!product_count()) return;
+	product_set(cell_index->row);
 	locations_show();
 }
 
 static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-	uber_refresh();
+	uber_request_products();
 }
