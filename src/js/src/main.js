@@ -48,7 +48,7 @@ var Uber = {
 			var latitude = pos.coords.latitude || 0;
 			var longitude = pos.coords.longitude || 0;
 			var i = 0;
-			if (!Uber.accessToken || true) {
+			if (!Uber.accessToken) {
 				Uber.locations.forEach(function(location) {
 					var index = i++;
 					var url = 'https://ineal.me/pebble/ultra/api/estimates/price?start_latitude=' + latitude + '&start_longitude=' + longitude + '&end_latitude=' + location.lat + '&end_longitude=' + location.lng;
