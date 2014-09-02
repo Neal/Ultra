@@ -1,12 +1,15 @@
 {
 	"TYPE": [
 		"ERROR",
-		"PRODUCT"
+		"PRODUCT",
+		"LOCATION"
 	],
 	"METHOD": [
 		"SIZE",
 		"DATA",
 		"REFRESH",
+		"REQUESTLOCATIONS",
+		"REQUESTPRICE",
 		"READY"
 	]
 }

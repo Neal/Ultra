@@ -65,6 +65,11 @@
 				"type": "png",
 				"name": "IMAGE_UBERLUX",
 				"file": "images/uberlux.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERBLACKTAXI",
+				"file": "images/uberblacktaxi.png"
 			}
 		]
 	}
