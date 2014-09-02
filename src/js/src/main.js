@@ -93,17 +93,19 @@ var Uber = {
 					appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:name, estimate:estimate});
 				});
 			});
-		}, function(err) { Uber.error('Failed to get geolocation!'); }, { timeout: 10000 });
+		// }, function(err) { Uber.error('Failed to get geolocation!'); }, { timeout: 10000 });
 	},
 
 	refresh: function() {
 		Uber.error('Trying to get Geolocation...');
-		navigator.geolocation.getCurrentPosition(function(pos) {
+		// navigator.geolocation.getCurrentPosition(function(pos) {
+			var pos = {};
+			pos.coords = fakeLocations.sanfran;
 			var latitude = pos.coords.latitude || 0;
 			var longitude = pos.coords.longitude || 0;
 			Uber.error('Requesting estimated pick up times...');
 			if (!Uber.accessToken) {
-				var url = 'https://ineal.me/pebble/ultra/api/estimates?latitude=' + latitude + '&longitude=' + longitude;
+				var url = 'https://ineal.me/pebble/ultra/api/estimates/time?latitude=' + latitude + '&longitude=' + longitude;
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', url, true);
 				xhr.onload = function() {
