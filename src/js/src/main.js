@@ -15,7 +15,7 @@ var Uber = {
 		},
 		location: function(error) {
 			appMessageQueue.clear();
-			appMessageQueue.send({type:TYPE.LOCATON, method:METHOD.ERROR, name:error});
+			appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.ERROR, name:error});
 		}
 	},
 
@@ -25,6 +25,9 @@ var Uber = {
 	},
 
 	sendLocations: function() {
+		if (!Uber.locations.length) {
+			return Uber.sendError.location('No locations found. Use the app settings in the Pebble mobile app to add favorite locations.');
+		}
 		appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.SIZE, index:Uber.locations.length});
 		for (var i = 0; i < Uber.locations.length; i++) {
 			var name = Uber.locations[i].name.substring(0,12);
