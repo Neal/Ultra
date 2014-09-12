@@ -70,7 +70,7 @@ static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuI
 static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
 	Product *product = product_get_current();
 	graphics_context_set_text_color(ctx, GColorBlack);
-	graphics_draw_bitmap_in_rect(ctx, product->image, product->image_bounds);
+	graphics_draw_bitmap_in_rect(ctx, product->resource.image, product->resource.bounds);
 	graphics_draw_text(ctx, product->name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(24, 2, 116, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	graphics_draw_text(ctx, product->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 2, 42, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
 }
@@ -79,8 +79,6 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 	graphics_context_set_text_color(ctx, GColorBlack);
 	if (location_get_error()) {
 		graphics_draw_text(ctx, location_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-	} else if (!location_count()) {
-		graphics_draw_text(ctx, "Loading...", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(4, 2, 136, 26), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	} else {
 		Location *location = location_get(cell_index->row);
 		graphics_draw_text(ctx, location->name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(4, 2, 136, 26), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
@@ -90,7 +88,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 	if (!location_count()) return;
-	location_set(cell_index->row);
+	location_set_current(cell_index->row);
 }
 
 static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {

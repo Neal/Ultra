@@ -5,22 +5,17 @@
 #include "generated/keys.h"
 #include "windows/products.h"
 
-static void free_products();
+#define NUM_RESOURCE_IMAGES sizeof(resource_images) / sizeof(resource_images[0])
 
-typedef struct {
-	uint32_t id;
-	GRect bounds;
-} ResourceImages;
-
-ResourceImages resource_images[] = {
-	{ RESOURCE_ID_IMAGE_UBERBLACK,     { { 1, 12 }, { 20, 6 } } },
-	{ RESOURCE_ID_IMAGE_UBERX,         { { 1, 12 }, { 20, 7 } } },
-	{ RESOURCE_ID_IMAGE_UBERXL,        { { 1, 12 }, { 20, 7 } } },
-	{ RESOURCE_ID_IMAGE_UBERTAXI,      { { 1, 12 }, { 20, 7 } } },
-	{ RESOURCE_ID_IMAGE_UBERBLACKTAXI, { { 1, 12 }, { 20, 7 } } },
-	{ RESOURCE_ID_IMAGE_UBERLUX,       { { 1, 12 }, { 20, 7 } } },
-	{ RESOURCE_ID_IMAGE_UBERSUV,       { { 1, 11 }, { 20, 8 } } },
-	{ RESOURCE_ID_IMAGE_UBERT,         { { 4,  8 }, { 14, 13 } } },
+ResourceImage resource_images[] = {
+	{ RESOURCE_ID_IMAGE_UBERBLACK,       NULL, { { 1, 12 }, { 20, 6 } } },
+	{ RESOURCE_ID_IMAGE_UBERX,           NULL, { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERXL,          NULL, { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERTAXI,        NULL, { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERBLACKTAXI,   NULL, { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERLUX,         NULL, { { 1, 12 }, { 20, 7 } } },
+	{ RESOURCE_ID_IMAGE_UBERSUV,         NULL, { { 1, 11 }, { 20, 8 } } },
+	{ RESOURCE_ID_IMAGE_UBERT,           NULL, { { 4,  8 }, { 14, 13 } } },
 };
 
 static Product* products = NULL;
@@ -31,12 +26,18 @@ static uint8_t current_product = 0;
 static char* error = NULL;
 
 void product_init(void) {
+	for (uint i = 0; i < NUM_RESOURCE_IMAGES; i++) {
+		resource_images[i].image = gbitmap_create_with_resource(resource_images[i].id);
+	}
 	products_init();
 }
 
 void product_deinit(void) {
 	free_safe(error);
-	free_products();
+	free_safe(products);
+	for (uint i = 0; i < NUM_RESOURCE_IMAGES; i++) {
+		gbitmap_destroy_safe(resource_images[i].image);
+	}
 	products_deinit();
 }
 
@@ -52,7 +53,7 @@ void product_in_received_handler(DictionaryIterator *iter) {
 			break;
 		}
 		case KEY_METHOD_SIZE:
-			free_products();
+			free_safe(products);
 			num_products = dict_find(iter, APP_KEY_INDEX)->value->uint8;
 			products = malloc(sizeof(Product) * num_products);
 			if (products == NULL) num_products = 0;
@@ -63,8 +64,7 @@ void product_in_received_handler(DictionaryIterator *iter) {
 			uint32_t resource = dict_find(iter, APP_KEY_RESOURCE)->value->uint32;
 			Product *product = product_get(index);
 			product->index = index;
-			product->image = gbitmap_create_with_resource(resource_images[resource].id);
-			product->image_bounds = resource_images[resource].bounds;
+			product->resource = resource_images[resource];
 			strncpy(product->name, dict_find(iter, APP_KEY_NAME)->value->cstring, sizeof(product->name) - 1);
 			strncpy(product->estimate, dict_find(iter, APP_KEY_ESTIMATE)->value->cstring, sizeof(product->estimate) - 1);
 			strncpy(product->surge, dict_find(iter, APP_KEY_SURGE)->value->cstring, sizeof(product->surge) - 1);
@@ -88,6 +88,7 @@ void product_count_set(uint8_t count) {
 }
 
 char* product_get_error() {
+	if (error == NULL && !product_count()) return "Loading...";
 	return &error[0];
 }
 
@@ -105,15 +106,6 @@ uint8_t product_get_current_index() {
 	return current_product;
 }
 
-void product_set(uint8_t index) {
+void product_set_current(uint8_t index) {
 	current_product = index;
-}
-
-static void free_products() {
-	if (products != NULL) {
-		for (int i = 0; i < product_count(); i++) {
-			gbitmap_destroy_safe(products[i].image);
-		}
-		free_safe(products);
-	}
 }

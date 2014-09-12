@@ -66,6 +66,7 @@ void location_count_set(uint8_t count) {
 }
 
 char* location_get_error() {
+	if (error == NULL && !location_count()) return "Loading...";
 	return &error[0];
 }
 
@@ -79,6 +80,6 @@ Location* location_get_current() {
 	return &locations[current_location];
 }
 
-void location_set(uint8_t index) {
+void location_set_current(uint8_t index) {
 	current_location = index;
 }

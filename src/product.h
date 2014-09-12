@@ -3,12 +3,17 @@
 #include <pebble.h>
 
 typedef struct {
+	uint32_t id;
+	GBitmap *image;
+	GRect bounds;
+} ResourceImage;
+
+typedef struct {
 	uint8_t index;
 	char name[12];
 	char estimate[8];
 	char surge[24];
-	GBitmap *image;
-	GRect image_bounds;
+	ResourceImage resource;
 } Product;
 
 void product_init(void);
@@ -21,4 +26,4 @@ char* product_get_error();
 Product* product_get(uint8_t index);
 Product* product_get_current();
 uint8_t product_get_current_index();
-void product_set(uint8_t index);
+void product_set_current(uint8_t index);

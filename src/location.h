@@ -17,4 +17,4 @@ void location_count_set(uint8_t count);
 char* location_get_error();
 Location* location_get(uint8_t index);
 Location* location_get_current();
-void location_set(uint8_t index);
+void location_set_current(uint8_t index);
