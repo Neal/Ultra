@@ -31,7 +31,7 @@ var Uber = {
 		appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.SIZE, index:Uber.locations.length});
 		for (var i = 0; i < Uber.locations.length; i++) {
 			var name = Uber.locations[i].name.substring(0,12);
-			appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:i, name:name, estimate:''});
+			appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:i, name:name, estimate:'', duration:'', distance:''});
 		}
 	},
 
@@ -74,12 +74,16 @@ var Uber = {
 						if (!res.prices || !res.prices.length) return;
 						var name = location.name.substring(0,12);
 						var estimate = '';
+						var duration = '';
+						var distance = '';
 						res.prices.forEach(function(price) {
 							if (Uber.products[productIndex].product_id == price.product_id) {
 								estimate = price.estimate;
+								duration = Math.ceil(price.duration / 60) + ' min';
+								distance = Math.ceil(price.distance) + ' miles';
 							}
 						});
-						appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:name, estimate:estimate});
+						appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:name, estimate:estimate, duration:duration, distance:distance});
 					};
 					xhr.send(null);
 				});

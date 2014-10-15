@@ -6,6 +6,8 @@ typedef struct {
 	uint8_t index;
 	char name[12];
 	char estimate[12];
+	char duration[12];
+	char distance[12];
 } Location;
 
 void location_init(void);

@@ -46,7 +46,9 @@ void location_in_received_handler(DictionaryIterator *iter) {
 			location->index = index;
 			strncpy(location->name, dict_find(iter, APP_KEY_NAME)->value->cstring, sizeof(location->name) - 1);
 			strncpy(location->estimate, dict_find(iter, APP_KEY_ESTIMATE)->value->cstring, sizeof(location->estimate) - 1);
-			LOG("location: %d '%s' '%s'", location->index, location->name, location->estimate);
+			strncpy(location->duration, dict_find(iter, APP_KEY_DURATION)->value->cstring, sizeof(location->duration) - 1);
+			strncpy(location->distance, dict_find(iter, APP_KEY_DISTANCE)->value->cstring, sizeof(location->distance) - 1);
+			LOG("location: %d '%s' '%s' '%s' '%s'", location->index, location->name, location->estimate, location->duration, location->distance);
 			location_reload_data_and_mark_dirty();
 			break;
 		}

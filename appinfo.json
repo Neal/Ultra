@@ -16,7 +16,9 @@
 		"name": 3,
 		"estimate": 4,
 		"surge": 5,
-		"resource": 6
+		"resource": 6,
+		"duration": 7,
+		"distance": 8
 	},
 	"resources": {
 		"media": [

@@ -64,7 +64,10 @@ static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuI
 	if (location_get_error()) {
 		return graphics_text_layout_get_content_size(location_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
 	}
-	return 40;
+	if (strlen(location_get(cell_index->row)->duration) || strlen(location_get(cell_index->row)->distance)) {
+		return 52;
+	}
+	return 36;
 }
 
 static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
@@ -81,8 +84,10 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 		graphics_draw_text(ctx, location_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	} else {
 		Location *location = location_get(cell_index->row);
-		graphics_draw_text(ctx, location->name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(4, 2, 136, 26), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-		graphics_draw_text(ctx, location->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 7, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, location->name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(4, 0, 136, 26), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, location->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 5, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, location->duration, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, location->distance, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
 	}
 }
 
