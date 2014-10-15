@@ -4,7 +4,7 @@ An Uber client for the Pebble Smartwatch that shows estimated pick up times with
 
 ![](https://assets.getpebble.com/api/file/1RwmkjI6RKFNsyW9xeeT/convert)&nbsp;
 ![](https://assets.getpebble.com/api/file/uPPx1InSIanJZHZ6Mi9g/convert)&nbsp;
-![](https://assets.getpebble.com/api/file/5kHYsFJT1Gt60Pbbcylm/convert)
+![](https://assets.getpebble.com/api/file/vW7vJBPETUq2v8E0WZs0/convert)
 
 ## License
 
