@@ -34,11 +34,14 @@ void locations_init(void) {
 }
 
 void locations_show(void) {
-	window_stack_push(window, true);
 	location_count() ? uber_request_price() : uber_request_locations();
 	for (int i = 0; i < location_count(); i++) {
 		memset(location_get(i)->estimate, 0x0, sizeof(location_get(i)->estimate));
+		memset(location_get(i)->duration, 0x0, sizeof(location_get(i)->duration));
+		memset(location_get(i)->distance, 0x0, sizeof(location_get(i)->distance));
 	}
+	window_stack_push(window, true);
+	menu_layer_reload_data_and_mark_dirty(menu_layer);
 }
 
 void locations_deinit(void) {
@@ -64,7 +67,7 @@ static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuI
 	if (location_get_error()) {
 		return graphics_text_layout_get_content_size(location_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
 	}
-	if (strlen(location_get(cell_index->row)->duration) || strlen(location_get(cell_index->row)->distance)) {
+	if (*location_get(cell_index->row)->duration || *location_get(cell_index->row)->distance) {
 		return 52;
 	}
 	return 36;
@@ -85,8 +88,8 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 	} else {
 		Location *location = location_get(cell_index->row);
 		graphics_draw_text(ctx, location->name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(4, 0, 136, 26), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-		graphics_draw_text(ctx, location->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 5, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
-		graphics_draw_text(ctx, location->duration, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, location->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, location->duration, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(4, 5, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
 		graphics_draw_text(ctx, location->distance, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
 	}
 }

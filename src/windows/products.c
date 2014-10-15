@@ -56,7 +56,7 @@ static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuI
 	} else if (product_get_error()) {
 		return graphics_text_layout_get_content_size(product_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
 	}
-	if (cell_index->row < product_count() && strlen(product_get(cell_index->row)->surge) != 0) {
+	if (*product_get(cell_index->row)->surge) {
 		return 48;
 	}
 	return 30;
@@ -73,7 +73,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 		graphics_draw_bitmap_in_rect(ctx, product->resource.image, product->resource.bounds);
 		graphics_draw_text(ctx, product->name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(24, 2, 116, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 		graphics_draw_text(ctx, product->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 2, 42, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
-		if (strlen(product->surge) != 0) {
+		if (*product->surge) {
 			graphics_draw_text(ctx, product->surge, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(24, 22, 116, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 			graphics_draw_bitmap_in_rect(ctx, surge, GRect(5, 28, 12, 13));
 		}
