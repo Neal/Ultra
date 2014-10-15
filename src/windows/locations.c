@@ -67,7 +67,7 @@ static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuI
 	if (location_get_error()) {
 		return graphics_text_layout_get_content_size(location_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
 	}
-	if (*location_get(cell_index->row)->duration || *location_get(cell_index->row)->distance) {
+	if (*location_get(cell_index->row)->estimate || *location_get(cell_index->row)->distance) {
 		return 52;
 	}
 	return 36;

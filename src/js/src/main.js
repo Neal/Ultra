@@ -99,17 +99,22 @@ var Uber = {
 						return Uber.refreshAccessToken(Uber.getPriceEstimates);
 					}
 					if (res.code && res.code == 'distance_exceeded') {
-						return appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:location.name.substring(0,12), estimate:'N/A'});
+						return appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:location.name.substring(0,12), estimate:'', duration:'N/A', distance:''});
 					}
 					if (!res.prices || !res.prices.length) return;
 					var name = location.name.substring(0,12);
 					var estimate = '';
+					var duration = '';
+					var distance = '';
 					res.prices.forEach(function(price) {
 						if (Uber.products[productIndex].product_id == price.product_id) {
 							estimate = price.estimate;
+							duration = Math.ceil(price.duration / 60) + ' min';
+							distance = Math.ceil(price.distance);
+							distance+= (distance > 1) ? ' miles' : ' mile';
 						}
 					});
-					appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:name, estimate:estimate});
+					appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:name, estimate:estimate, duration:duration, distance:distance});
 				});
 			});
 		}, function(err) { Uber.sendError.location('Failed to get geolocation!'); }, { timeout: 10000 });
