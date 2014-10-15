@@ -86,8 +86,8 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 		Location *location = location_get(cell_index->row);
 		graphics_draw_text(ctx, location->name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(4, 0, 136, 26), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 		graphics_draw_text(ctx, location->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 5, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
-		graphics_draw_text(ctx, location->duration, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-		graphics_draw_text(ctx, location->distance, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, location->duration, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, location->distance, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(4, 26, 138, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
 	}
 }
 
