@@ -80,7 +80,8 @@ var Uber = {
 							if (Uber.products[productIndex].product_id == price.product_id) {
 								estimate = price.estimate;
 								duration = Math.ceil(price.duration / 60) + ' min';
-								distance = Math.ceil(price.distance) + ' miles';
+								distance = Math.ceil(price.distance);
+								distance+= (distance > 1) ? ' miles' : ' mile';
 							}
 						});
 						appMessageQueue.send({type:TYPE.LOCATION, method:METHOD.DATA, index:index, name:name, estimate:estimate, duration:duration, distance:distance});
