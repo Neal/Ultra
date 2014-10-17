@@ -60,7 +60,7 @@ static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_
 }
 
 static int16_t menu_get_header_height_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-	return 28;
+	return 30;
 }
 
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
@@ -79,6 +79,7 @@ static void menu_draw_header_callback(GContext *ctx, const Layer *cell_layer, ui
 	graphics_draw_bitmap_in_rect(ctx, product->resource.image, product->resource.bounds);
 	graphics_draw_text(ctx, product->name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(24, 2, 116, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	graphics_draw_text(ctx, product->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 2, 42, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+	graphics_draw_line(ctx, GPoint(0, 28), GPoint(144, 28));
 }
 
 static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
