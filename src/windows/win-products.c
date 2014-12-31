@@ -1,9 +1,9 @@
 #include <pebble.h>
-#include "products.h"
+#include "win-products.h"
 #include "libs/pebble-assist.h"
 #include "uber.h"
-#include "product.h"
-#include "locations.h"
+#include "products.h"
+#include "win-locations.h"
 
 static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context);
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
@@ -15,7 +15,7 @@ static Window *window = NULL;
 static MenuLayer *menu_layer = NULL;
 static GBitmap *surge = NULL;
 
-void products_init(void) {
+void win_products_init(void) {
 	window = window_create();
 
 	menu_layer = menu_layer_create_fullscreen(window);
@@ -34,29 +34,29 @@ void products_init(void) {
 	window_stack_push(window, true);
 }
 
-void products_deinit(void) {
+void win_products_deinit(void) {
 	gbitmap_destroy_safe(surge);
 	menu_layer_destroy_safe(menu_layer);
 	window_destroy_safe(window);
 }
 
-void products_reload_data_and_mark_dirty(void) {
+void win_products_reload_data_and_mark_dirty(void) {
 	menu_layer_reload_data_and_mark_dirty(menu_layer);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
 static uint16_t menu_get_num_rows_callback(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-	return product_count() ? product_count() : 1;
+	return products_count() ? products_count() : 1;
 }
 
 static int16_t menu_get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 	if (uber_get_error()) {
 		return graphics_text_layout_get_content_size(uber_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
-	} else if (product_get_error()) {
-		return graphics_text_layout_get_content_size(product_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
+	} else if (products_get_error()) {
+		return graphics_text_layout_get_content_size(products_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft).h + 12;
 	}
-	if (*product_get(cell_index->row)->surge) {
+	if (*products_get(cell_index->row)->surge) {
 		return 48;
 	}
 	return 30;
@@ -66,10 +66,10 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 	graphics_context_set_text_color(ctx, GColorBlack);
 	if (uber_get_error()) {
 		graphics_draw_text(ctx, uber_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-	} else if (product_get_error()) {
-		graphics_draw_text(ctx, product_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+	} else if (products_get_error()) {
+		graphics_draw_text(ctx, products_get_error(), fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(4, 2, 136, 128), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 	} else {
-		Product *product = product_get(cell_index->row);
+		Product *product = products_get(cell_index->row);
 		graphics_draw_bitmap_in_rect(ctx, product->resource.image, product->resource.bounds);
 		graphics_draw_text(ctx, product->name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(24, 2, 116, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 		graphics_draw_text(ctx, product->estimate, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 2, 42, 22), GTextOverflowModeFill, GTextAlignmentRight, NULL);
@@ -81,9 +81,9 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
 }
 
 static void menu_select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-	if (!product_count()) return;
-	product_set_current(cell_index->row);
-	locations_show();
+	if (!products_count()) return;
+	products_set_current(cell_index->row);
+	win_locations_show();
 }
 
 static void menu_select_long_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {

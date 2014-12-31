@@ -4,7 +4,7 @@
 	"longName": "Ultra",
 	"companyName": "Neal",
 	"versionCode": 1,
-	"versionLabel": "1.7",
+	"versionLabel": "1.8",
 	"capabilities": [ "configurable", "location" ],
 	"watchapp": {
 		"watchface": false
@@ -20,6 +20,10 @@
 		"duration": 7,
 		"distance": 8
 	},
+	"config": {
+		"keen": { "projectId": "54532546383144606636cc19", "writeKey": "fcc0b3a72b5ae3a422f66dfd79e1817ea54763e2220a28af2e566205c884d646217451fa11ae130706facc0ffa66990b8acc1aebaa7562592ff9ff98dd00a6c0dba6c05de026e18a856897c07aa6e7cba43c6e71df45d2f584940da816ef01ab382c362d18b372b4a074dd6571fd78d2" }
+	},
+	"debug": true,
 	"resources": {
 		"media": [
 			{
@@ -72,6 +76,11 @@
 				"type": "png",
 				"name": "IMAGE_UBERBLACKTAXI",
 				"file": "images/uberblacktaxi.png"
+			},
+			{
+				"type": "png",
+				"name": "IMAGE_UBERPLUS",
+				"file": "images/uberplus.png"
 			}
 		]
 	}

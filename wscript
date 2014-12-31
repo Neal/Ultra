@@ -17,7 +17,8 @@ def distclean(ctx):
 	ctx.load('pebble_sdk')
 	for p in ['build', 'src/generated', 'src/js/src/generated', 'src/js/pebble-js-app.js']:
 		try:
-			shutil.rmtree(p)
+			if os.path.isfile(p): os.remove(p)
+			elif os.path.isdir(p): shutil.rmtree(p)
 		except OSError as e:
 			pass
 
@@ -36,6 +37,9 @@ def build(ctx):
 	# Generate keys.h
 	ctx(rule=generate_keys_h, source='src/keys.json', target='../src/generated/keys.h')
 
+	# Generate appinfo.js
+	ctx(rule=generate_appinfo_js, source='appinfo.json', target='../src/js/src/generated/appinfo.js')
+
 	# Generate keys.js
 	ctx(rule=generate_keys_js, source='src/keys.json', target='../src/js/src/generated/keys.js')
 
@@ -52,6 +56,7 @@ def generate_appinfo_h(task):
 	appinfo = json.load(open(src))
 	f = open(target, 'w')
 	f.write('#pragma once\n\n')
+	f.write('#define DEBUG {0}\n'.format('true' if appinfo['debug'] else 'false'))
 	f.write('#define VERSION_LABEL "{0}"\n'.format(appinfo['versionLabel']))
 	f.write('#define UUID "{0}"\n'.format(appinfo['uuid']))
 	for key in appinfo['appKeys']:
@@ -71,6 +76,16 @@ def generate_keys_h(task):
 		f.write('};\n')
 	f.close()
 
+def generate_appinfo_js(task):
+	src = task.inputs[0].abspath()
+	target = task.outputs[0].abspath()
+	data = open(src).read().strip()
+	f = open(target, 'w')
+	f.write('var AppInfo = ')
+	f.write(data)
+	f.write(';')
+	f.close()
+
 def generate_keys_js(task):
 	src = task.inputs[0].abspath()
 	target = task.outputs[0].abspath()
@@ -88,7 +103,7 @@ def generate_keys_js(task):
 
 def concatenate_js(task):
 	inputs = (input.abspath() for input in task.inputs)
-	uglifyjs(*inputs, o=task.outputs[0].abspath(), b=False)
+	uglifyjs(*inputs, o=task.outputs[0].abspath(), b=True)
 
 def js_jshint(task):
 	inputs = (input.abspath() for input in task.inputs)
